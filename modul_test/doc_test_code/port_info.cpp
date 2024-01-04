@@ -1,25 +1,24 @@
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
+#include <iostream>
+#include <sstream>
 
-int main(int argc, char ** argv) {
+int main() {
     struct snmp_session session, *session_ptr;
-    struct snmp_pdu *pdu_ptr;
-    struct snmp_pdu *res_pdu_ptr;
+    struct snmp_pdu *pdu_ptr, *response_ptr;
 
+    std::string interface_num_str, status_str; 
+    
+    int status, if_count = 0, if_status_value;
     oid anOID[MAX_OID_LEN];
     size_t anOID_len = MAX_OID_LEN;
 
-    snmp_sess_init(&session);  // 구조체 초기화
+    snmp_sess_init(&session);  // 세션 구조체 초기화
     session.peername = strdup("10.0.1.254");
-
-    // SNMP 버전 설정 (v1, v2c, v3 중 선택)
-    session.version = SNMP_VERSION_2c; // SNMP v2c
-
-    // 커뮤니티 문자열 설정
+    session.version = SNMP_VERSION_2c; // SNMP 버전 설정
     session.community = (u_char *)"public";
     session.community_len = strlen((const char *)session.community);
 
-    // 세션 열기
     SOCK_STARTUP;
     session_ptr = snmp_open(&session);
     if (!session_ptr) {
@@ -28,42 +27,61 @@ int main(int argc, char ** argv) {
         exit(1);
     }
 
-    // PDU 생성 및 OID 추가
-    pdu_ptr = snmp_pdu_create(SNMP_MSG_GETBULK); // GETBULK 요청 사용
-    pdu_ptr->non_repeaters = 0; // 통상적으로 0으로 설정합니다.
-    pdu_ptr->max_repetitions = 1000; // 적절한 값으로 조정해야 합니다.
-    read_objid(".1.3.6.1.2.1.4.22.1.3", anOID, &anOID_len); // IFINDEX -> Port 번호와 매핑 된다고 함
+    pdu_ptr = snmp_pdu_create(SNMP_MSG_GETBULK);
+    pdu_ptr->non_repeaters = 0;
+    pdu_ptr->max_repetitions = 10; // 임의의 큰 수로 설정하여 인터페이스 개수를 가져옴
 
+    read_objid(".1.3.6.1.2.1.2.2.1.1", anOID, &anOID_len); // ifIndex OID 입력
     snmp_add_null_var(pdu_ptr, anOID, anOID_len);
 
     // SNMP 요청 보내기
-    int status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
+    status = snmp_synch_response(session_ptr, pdu_ptr, &response_ptr);
 
     // 응답 처리
-    if (status_int == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR) {
-
-        // 성공적으로 응답을 받았을 경우 처리
-        for(netsnmp_variable_list *vars = res_pdu_ptr->variables; vars; vars = vars->next_variable) {
-            print_variable(vars->name, vars->name_length, vars);
+    if (status == STAT_SUCCESS && response_ptr->errstat == SNMP_ERR_NOERROR) {
+        netsnmp_variable_list *vars;
+        for(vars = response_ptr->variables; vars; vars = vars->next_variable) {
+            if (vars->type == ASN_INTEGER) {
+                ++if_count;
+            }
         }
+        // PDU 재사용하여 인터페이스 상태 가져오기
+        snmp_free_pdu(pdu_ptr);
+        pdu_ptr = snmp_pdu_create(SNMP_MSG_GETBULK);
+        pdu_ptr->non_repeaters = 0;
+        pdu_ptr->max_repetitions = if_count;
 
+        read_objid(".1.3.6.1.2.1.2.2.1.8", anOID, &anOID_len); // ifOperStatus OID 입력
+        snmp_add_null_var(pdu_ptr, anOID, anOID_len);
+        
+        status = snmp_synch_response(session_ptr, pdu_ptr, &response_ptr);
+
+        if (status == STAT_SUCCESS && response_ptr->errstat == SNMP_ERR_NOERROR) {
+            for(vars = response_ptr->variables; vars; vars = vars->next_variable) {
+                char oid_buf[2048], val_buf[2048];
+                snprint_objid(oid_buf, sizeof(oid_buf), vars->name, vars->name_length);
+                interface_num_str = std::string(oid_buf).substr(22);
+                snprint_value(val_buf, sizeof(val_buf), vars->name, vars->name_length, vars);
+                status_str = std::string(val_buf).substr(9, 1);
+                if_status_value = stoi(status_str);
+                std::cout << "Port = " << interface_num_str << ", State = " << if_status_value << std::endl;
+            }
+        }
     } else {
-        // 실패 처리
-        if (status_int == STAT_SUCCESS) {
-            fprintf(stderr, "Error in packet\nReason: %s\n", snmp_errstring(res_pdu_ptr->errstat));
-        } else if (status_int == STAT_TIMEOUT) {
-            fprintf(stderr, "Timeout: No res_pdu_ptr from %s.\n", session.peername);
+        // 오류 처리
+        if (status == STAT_SUCCESS) {
+            fprintf(stderr, "Error in packet\nReason: %s\n", snmp_errstring(response_ptr->errstat));
+        } else if (status == STAT_TIMEOUT) {
+            fprintf(stderr, "Timeout: No response from %s\n", session.peername);
         } else {
-            snmp_sess_perror("snmp_synch_res", session_ptr);
+            snmp_sess_perror("snmp_synch_response", session_ptr);
         }
     }
 
     // 세션 정리
-    if (res_pdu_ptr) {
-        snmp_free_pdu(res_pdu_ptr);
-    }
+    if (response_ptr) snmp_free_pdu(response_ptr);
     snmp_close(session_ptr);
 
     SOCK_CLEANUP;
-    return (status_int == STAT_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return (status == STAT_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
