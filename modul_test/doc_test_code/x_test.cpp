@@ -33,8 +33,8 @@ int main() {
     // PDU 생성 및 OID 추가
     pdu_ptr = snmp_pdu_create(SNMP_MSG_GETBULK); // GETBULK 요청 사용
     pdu_ptr->non_repeaters = 0; // 통상적으로 0으로 설정합니다.
-    pdu_ptr->max_repetitions = 1000; // 적절한 값으로 조정
-    read_objid("1.3.6.1.2.1.17.4.3.1.1", anOID, &anOID_len);
+    pdu_ptr->max_repetitions = 80; // 적절한 값으로 조정
+    read_objid(".1.3.6.1.4.1.9.5.1.4.1.1.11", anOID, &anOID_len);
 
     snmp_add_null_var(pdu_ptr, anOID, anOID_len);
 

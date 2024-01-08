@@ -2,18 +2,15 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <iostream>
 #include <sstream>
-#include <map>
-#include <string>
 
 
 int main() {
     struct snmp_session session, *session_ptr;
     struct snmp_pdu *pdu_ptr, *response_ptr;
 
-    std::string interface_num_str, status_str; 
-    std::map<std::string, int> insterface_state_map; 
-
-    int status, if_count = 0, if_status_value;
+    std::string oid_str, val_str, check_str; 
+    
+    int status, if_count = 0, if_num;
     oid anOID[MAX_OID_LEN];
     size_t anOID_len = MAX_OID_LEN;
 
@@ -45,32 +42,38 @@ int main() {
     if (status == STAT_SUCCESS && response_ptr->errstat == SNMP_ERR_NOERROR) {
         netsnmp_variable_list *vars;
         for(vars = response_ptr->variables; vars; vars = vars->next_variable) {
+            
             if (vars->type == ASN_INTEGER) {
                 ++if_count;
             }
         }
+
+
         pdu_ptr = snmp_pdu_create(SNMP_MSG_GETBULK);
         pdu_ptr->non_repeaters = 0;
         pdu_ptr->max_repetitions = if_count;
 
-        read_objid(".1.3.6.1.2.1.2.2.1.8", anOID, &anOID_len); // ifOperStatus OID 입력
+        // ifOperStatus OID 입력
+        anOID_len = MAX_OID_LEN;
+        read_objid("1.3.6.1.4.1.9.5.1.4.1.1.11", anOID, &anOID_len); 
         snmp_add_null_var(pdu_ptr, anOID, anOID_len);
         status = snmp_synch_response(session_ptr, pdu_ptr, &response_ptr);
+        
 
         if (status == STAT_SUCCESS && response_ptr->errstat == SNMP_ERR_NOERROR) {
             for(vars = response_ptr->variables; vars; vars = vars->next_variable) {
                 char oid_buf[2048], val_buf[2048];
                 snprint_objid(oid_buf, sizeof(oid_buf), vars->name, vars->name_length);
-                interface_num_str = std::string(oid_buf).substr(22);
+                oid_str = std::string(oid_buf).substr(31);
+                check_str = std::string(oid_buf).substr(26, 2); // OID 그룹 추출
+
                 snprint_value(val_buf, sizeof(val_buf), vars->name, vars->name_length, vars);
-                status_str = std::string(val_buf).substr(9, 1);
-                if_status_value = stoi(status_str);
-                std::cout << "Port = " << interface_num_str << ", State = " << if_status_value << std::endl;
-                insterface_state_map.insert({interface_num_str, if_status_value});
+                if (vars->type == ASN_INTEGER && check_str == "11" ) { // 원하는 OID 그룹이 확실한 경우
+                    val_str = std::string(val_buf).substr(9);
+                    if_num = stoi(val_str);
+                    std::cout << "Port = " << oid_str << ", State = " << if_num << std::endl;
+                }
             }
-        }
-        for (const auto& pair : insterface_state_map) {
-            std::cout << " MAP !!! -> " << pair.first << " : " << pair.second << std::endl;
         }
     } else {
         // 오류 처리
