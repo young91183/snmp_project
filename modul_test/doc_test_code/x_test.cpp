@@ -2,12 +2,16 @@
 #include <net-snmp/net-snmp-includes.h>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 int main() {
     struct snmp_session session, *session_ptr;
     struct snmp_pdu *pdu_ptr;
     struct snmp_pdu *res_pdu_ptr;
 
+    int i, dot_cnt, oid_point;
+
+    std::string interface_num_str, req_oid_str = "1.3.6.1.2.1.17.4.3.1.2";
     oid anOID[MAX_OID_LEN];
     size_t anOID_len = MAX_OID_LEN;
 
@@ -18,7 +22,7 @@ int main() {
     session.version = SNMP_VERSION_2c; // SNMP v2c
 
     // 커뮤니티 문자열 설정
-    session.community = (u_char *)"public";
+    session.community = (u_char *)"public@101";
     session.community_len = strlen((const char *)session.community);
 
     // 세션 열기
@@ -30,42 +34,59 @@ int main() {
         exit(1);
     }
 
-    // PDU 생성 및 OID 추가
-    pdu_ptr = snmp_pdu_create(SNMP_MSG_GETBULK); // GETBULK 요청 사용
-    pdu_ptr->non_repeaters = 0; // 통상적으로 0으로 설정합니다.
-    pdu_ptr->max_repetitions = 80; // 적절한 값으로 조정
-    read_objid(".1.3.6.1.4.1.9.5.1.4.1.1.11", anOID, &anOID_len);
+    for(i=0; i<3; i++) {
 
-    snmp_add_null_var(pdu_ptr, anOID, anOID_len);
+        // PDU 생성 및 OID 추가
+        anOID_len = MAX_OID_LEN;
+        pdu_ptr = snmp_pdu_create(SNMP_MSG_GETBULK); // GETBULK 요청 사용
+        pdu_ptr->non_repeaters = 0; // 통상적으로 0으로 설정합니다.
+        pdu_ptr->max_repetitions = 25; // 적절한 값으로 조정
+        read_objid(req_oid_str.c_str(), anOID, &anOID_len);
 
-    // SNMP 요청 보내기
-    int status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
+        snmp_add_null_var(pdu_ptr, anOID, anOID_len);
 
-    // 응답 처리
-    if (status_int == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR) {
+        // SNMP 요청 보내기
+        int status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
 
-        // 성공적으로 응답을 받았을 경우 처리
-        for(netsnmp_variable_list *vars = res_pdu_ptr->variables; vars; vars = vars->next_variable) {
-            print_variable(vars->name, vars->name_length, vars);
-        }
+        // 응답 처리
+        if (status_int == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR) {
 
-    } else {
-        // 실패 처리
-        if (status_int == STAT_SUCCESS) {
-            fprintf(stderr, "Error in packet\nReason: %s\n", snmp_errstring(res_pdu_ptr->errstat));
-        } else if (status_int == STAT_TIMEOUT) {
-            fprintf(stderr, "Timeout: No res_pdu_ptr from %s.\n", session.peername);
+            // 성공적으로 응답을 받았을 경우 처리
+            for(netsnmp_variable_list *vars = res_pdu_ptr->variables; vars; vars = vars->next_variable) {
+                char oid_buf[2024];
+                print_variable(vars->name, vars->name_length, vars);
+
+                if (vars->next_variable == NULL){
+                    snprint_objid(oid_buf, sizeof(oid_buf), vars->name, vars->name_length);
+                    interface_num_str = std::string(oid_buf); // 인터페이스 정보 추출
+                }
+            }
+            req_oid_str = "1." + interface_num_str.substr(4);
+            std::cout << req_oid_str << " / " << interface_num_str << std::endl;
+
         } else {
-            snmp_sess_perror("snmp_synch_res", session_ptr);
+            // 실패 처리
+            if (status_int == STAT_SUCCESS) {
+                fprintf(stderr, "Error in packet\nReason: %s\n", snmp_errstring(res_pdu_ptr->errstat));
+            } else if (status_int == STAT_TIMEOUT) {
+                fprintf(stderr, "Timeout: No res_pdu_ptr from %s.\n", session.peername);
+            } else {
+                snmp_sess_perror("snmp_synch_res", session_ptr);
+            }
         }
+
+   
     }
 
-    // 세션 정리
+        // 세션 정리
     if (res_pdu_ptr) {
         snmp_free_pdu(res_pdu_ptr);
     }
     snmp_close(session_ptr);
 
     SOCK_CLEANUP;
-    return (status_int == STAT_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return 0;
 }
+
+
+
