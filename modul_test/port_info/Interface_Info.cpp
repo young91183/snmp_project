@@ -27,15 +27,15 @@ Interface_Info_Save::Interface_Info_Save(){
         exit(1); 
     }
 
-    // mysql connection 설정
+    // mysql connection 설정 
     mysql_server = "localhost"; 
     user = "root"; 
     password = "0000"; 
     database = "Network_EQPT_Info";  
-    conn = mysql_init(NULL);
+    conn = mysql_init(NULL); 
     if (!mysql_real_connect(conn, mysql_server, user, password, database, 0, NULL, 0)) { 
-        std::cerr << mysql_error(conn) << std::endl;
-        exit(1);
+        std::cerr << mysql_error(conn) << std::endl; 
+        exit(1); 
     }
 
 }
@@ -59,18 +59,26 @@ Interface_Info_Save::~Interface_Info_Save(){
 
 // DB에 인터페이스 정보 저장/갱신
 void Interface_Info_Save::interface_info_save(std::map<std::string, std::string> if_port_map){
-    std::string query = "" ,q_key = "", q_val = "" ;
-    std::cout << "DB에 저장!" <<std::endl;
+    std::string up_time;
+    std::string query, q_val, q_dup ;
 
-    for (const auto& pair : if_port_map) {
-        std::cout << "port: " << pair.first << ", interface: " << pair.second << std::endl;
+    for (const auto& [if_num, state] : insterface_state_map) {
+        query = "INSERT INTO if_info (if_num, state, up_time) VALUE ";
+        q_val = "";
+        q_dup = " ON DUPLICATE KEY UPDATE ";
+        up_time = getCurrentDateTime();
+
+        // 쿼리문 작성
+        q_val += "(" + if_num + ", " + state + ", '" + up_time + "')";
+        q_dup += "state = " + state + ", up_time = '" + up_time + "'";
+        query += q_val + q_dup;
+        
+        // 쿼리문 실행
+        if (mysql_query(conn, query.c_str())) { 
+            std::cerr <<  mysql_error(conn) << std::endl;
+            exit(1);
+        }
     }
-
-    for (const auto& pair : insterface_state_map) {
-        std::cout << "Interface: " << pair.first << ", Status: " << pair.second << std::endl;
-    }
-
-
 }
 
 
@@ -108,7 +116,6 @@ int Interface_Info_Save::state_map_renew(){
             snprint_value(val_buf, sizeof(val_buf), vars->name, vars->name_length, vars);
             status_str = std::string(val_buf).substr(9, 1); // 불필요한 문자 제외
             //if_status_value = stoi(status_str); // 정수로 변환
-            std::cout << "interface_num = " << interface_num_str << ", State = " << status_str << std::endl;
             insterface_state_map.insert({interface_num_str, status_str}); // 변수에 저장
         }
     } else { // 오류 처리 
@@ -308,6 +315,7 @@ std::map<std::string, std::string> Interface_Map_Info::get_if_port_map(){
 
 /*------------------------Interface_Map_Info------------------------*/
 
+
 // 현재시간 추출 후 Date Time 형식으로 가공해 반환
 std::string getCurrentDateTime() {
 	auto now = std::chrono::system_clock::now();
@@ -321,13 +329,17 @@ std::string getCurrentDateTime() {
 }
 
 
+
+// 나중에 Thread 분리 될 모듈 제어를 위한 함수
 void interface_save_manger(bool *isLoop_ptr){
 
+    // 객체 생성
     Interface_Map_Info* if_map_info = new Interface_Map_Info();
     Interface_Info_Save* if_info_save = new Interface_Info_Save();
 
     std::map<std::string, std::string> temp_map;
 
+    // 반복문 삽입 위치
     if (if_map_info->interface_map_renew() == 1){
         std::cout << "interface_map_renew err\n";
         exit(1);
@@ -341,13 +353,16 @@ void interface_save_manger(bool *isLoop_ptr){
 
     if_info_save->interface_info_save(temp_map);
 
+    // 반복문 종료
+
     delete if_map_info;
     delete if_info_save;
     if_map_info = NULL;
     if_info_save = NULL;
 }
 
-// main 함수
+
+// 임시 main 함수
 int main(void){
     bool isLoop = false;
 
