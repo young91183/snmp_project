@@ -26,6 +26,8 @@ class Traffic_Info_Save
         std::map<std::string, std::vector<long>> pps_map;
         std::map<std::string, std::vector<long>> bps_map;
 
+        //mutex
+        std::mutex mtx;
 
         // snmp 관련 변수 
         struct snmp_session session, *session_ptr; 

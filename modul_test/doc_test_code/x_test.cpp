@@ -11,7 +11,7 @@ int main() {
 
     int i, dot_cnt, oid_point;
 
-    std::string interface_num_str, req_oid_str = "1.3.6.1.2.1.17.4.3.1.2";
+    std::string interface_num_str, req_oid_str = "1.3.6.1.2.1.2.2.1.2";
     oid anOID[MAX_OID_LEN];
     size_t anOID_len = MAX_OID_LEN;
 

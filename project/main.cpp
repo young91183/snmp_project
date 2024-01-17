@@ -10,9 +10,11 @@ int main(void)
     bool isLoop = false, start_sgin = false;
     std::string user_req_str = "";
     std::thread interface_thread, traffic_thread, eqpt_thread;
+
     Interface_Map_Info* if_map_info = new Interface_Map_Info();;
     Interface_Info_Save* if_info_save = new Interface_Info_Save();
     std::map <std::string, std::string> temp_map;
+    
 
     // 초기 인터페이스 맵 작성 (활성화 확인)
     if_cnt = if_map_info->count_interface();

@@ -32,6 +32,8 @@ class EQPT_Info_Save
         oid anOID[MAX_OID_LEN]; 
         size_t anOID_len; 
 
+        std::mutex mtx;
+
         // mysql connection 
         const char* mysql_server; 
         const char* user; 

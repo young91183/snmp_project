@@ -95,7 +95,7 @@ void EQPT_Info_Save::eqpt_save_db(){
 
 void EQPT_Info_Save::get_vlan_list(int if_cnt)
 {
-
+    std::unique_lock<std::mutex> lock(mtx);
     std::string oid_data_str, if_type_str, check_str;
     int status_num;
 
@@ -175,6 +175,8 @@ int EQPT_Info_Save::get_eqpt_info()
     // 맵 초기화
     mac_eqpt_map.clear();
 
+
+    netsnmp_variable_list *vars;
     do {
         // PDU 생성 및 OID 추가
         anOID_len = MAX_OID_LEN;
@@ -191,7 +193,7 @@ int EQPT_Info_Save::get_eqpt_info()
         if (status_num == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR) 
         {   
             // 성공적으로 응답을 받았을 경우 처리
-            netsnmp_variable_list *vars = res_pdu_ptr->variables;
+            vars = res_pdu_ptr->variables;
             while(vars)
             {
                 char oid_buf[2048],  val_buf[2048];
@@ -233,6 +235,7 @@ int EQPT_Info_Save::get_eqpt_info()
                 if (vars->next_variable == NULL)
                 {
                     oid_data_str = std::string(oid_buf); // OID 추출
+                    break; 
                 }
                 vars = vars->next_variable;
             }
@@ -435,7 +438,6 @@ int EQPT_Info_Save::get_vlan_eqpt_port(std::map<std::string, std::string> port_i
                 }
                 return -1;
             }
-            
         } while(!loop_b);
     } // VLAN for문 종료
     

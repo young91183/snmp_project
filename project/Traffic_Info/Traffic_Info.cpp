@@ -3,7 +3,6 @@
 /*------------------------Traffic_Info_Save------------------------*/
 Traffic_Info_Save::Traffic_Info_Save()
 { 
-
     // SNMP 설정 
     anOID_len = MAX_OID_LEN; 
     snmp_sess_init(&session); 
@@ -38,14 +37,12 @@ Traffic_Info_Save::Traffic_Info_Save()
         std::cerr << mysql_error(conn) << std::endl; 
         exit(1); 
     }
-
 }
 
 
 // Interface 저장 모듈 소멸자
 Traffic_Info_Save::~Traffic_Info_Save()
 {
-
     // session 정리
     if (res_pdu_ptr) 
     {
@@ -57,7 +54,6 @@ Traffic_Info_Save::~Traffic_Info_Save()
     // mysql 연결 해제
     mysql_close(conn);
     std::cout << "Traffic_Info_Save 소멸 \n";
-
 }
 
 // 맵 초기 설정 (활성화 인터페이스 리스트 받아서 초기설정)
@@ -83,11 +79,11 @@ void Traffic_Info_Save::traffic_save_db(std::map<std::string, std::string> if_po
         // 쿼리문 작성
         q_val += traffic[0] + ", " + traffic[1] + ")"; 
         query += q_val;
-        //std::cout << query << std::endl;
 
         // 쿼리문 실행
         if (mysql_query(conn, query.c_str())) 
-        { 
+        {
+            std::cout << query << std::endl;
             std::cerr <<  mysql_error(conn) << std::endl;
             exit(1);
         }
@@ -130,7 +126,6 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
 
     // 시작 전 맵 정리
     bps_map.clear();
-    //std::cout << "bps clear err? \n";
     
     while(loop_cnt < 2) 
     {
@@ -232,6 +227,7 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
 
         // snmp 요청 : 송신 buffer
         status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
+
         if (status_int == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR) 
         {
             vars = res_pdu_ptr->variables;
@@ -284,11 +280,9 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
             }
             return -1;
         }
-
         loop_cnt ++;
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-
     // printMap(interface_traffic_map);
     return 0;
 }
@@ -303,11 +297,10 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
 
     // 시간 계산을 위한 변수
     std::vector<std::chrono::system_clock::time_point> start_time_vec;
-    std::chrono::nanoseconds runtime_nano_sec; 
+    std::chrono::nanoseconds runtime_nano_sec;
     double rTime_d;
 
     pps_map.clear();
-    //std::cout << "pps clear err? \n";
 
     while(loop_cnt < 2) 
     {   
@@ -335,6 +328,8 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
 
         // snmp 요청
         status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
+
+        // pps 계산
         if(pps_snmp_operate(status_int, loop_cnt, 0, rTime_d, "11") == -1)
         {
             std::cout << "snmp err 0\n";
@@ -364,6 +359,8 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
 
         // snmp 요청
         status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
+
+        // ppd 계산
         if(pps_snmp_operate(status_int, loop_cnt, 1, rTime_d, "17")== -1)
         {
             std::cout << "snmp err 1\n";
@@ -393,6 +390,8 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
 
         // snmp 요청
         status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
+        
+        // 인터페이스별 pps 계산
         if(pps_snmp_operate(status_int, loop_cnt, 2, rTime_d, "12") == -1)
         {
             std::cout << "snmp err 2\n";
@@ -421,6 +420,8 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
 
         // snmp 요청
         status_int = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
+
+        // 인터페이스 별 pps 계산
         if(pps_snmp_operate(status_int, loop_cnt, 3, rTime_d, "18") == -1)
         {
             std::cout << "snmp err 3\n";
@@ -431,6 +432,7 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
         loop_cnt ++;
         //std::cout << "loop : " << loop_cnt << std::endl;
     }
+
     // printMap(interface_traffic_map);
     return 0;
 }
@@ -441,6 +443,7 @@ int Traffic_Info_Save::pps_snmp_operate(int status_int,  int loop_cnt, int index
 {   
     double pps_d;
     long pps_l;
+
     // 시간 계산을 위한 변수
     std::string interface_num_str, pps_info_str, check_str;
 
@@ -478,7 +481,8 @@ int Traffic_Info_Save::pps_snmp_operate(int status_int,  int loop_cnt, int index
                 //pps_info_str = std::to_string((*pps_map)[interface_num_str][0] + (*pps_map)[interface_num_str][1] + (*pps_map)[interface_num_str][2] + (*pps_map)[interface_num_str][3]); // PPS 계산
                 //interface_traffic_map[interface_num_str].push_back(pps_info_str);
                 //std::cout << interface_num_str << " / " << pps_info_str << std::endl;
-            }*/
+            }
+            */
             else
             {   
                 pps_d = (pps_l - pps_map[interface_num_str][index_num]) / runtime;
@@ -491,7 +495,8 @@ int Traffic_Info_Save::pps_snmp_operate(int status_int,  int loop_cnt, int index
     { // snmp 오류 처리
         if (status_int == STAT_SUCCESS) 
         {
-            std::cerr << "Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+            std::cout << "Error in packet\nReason: ";
+            std::cerr << snmp_errstring(res_pdu_ptr->errstat) << "\n";
         } 
         else if (status_int == STAT_TIMEOUT) 
         {
@@ -512,7 +517,7 @@ int Traffic_Info_Save::pps_snmp_operate(int status_int,  int loop_cnt, int index
 
 void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info)
 {
-    //std::thread bps_thread, pps_thread;
+    std::thread bps_thread, pps_thread;
     std::map<std::string, std::string> temp_map;
     //std::mutex mtx;
     int if_cnt, i;
@@ -522,7 +527,6 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info)
 
     while(*isLoop_ptr)
     {
-
         // 인터페이스 개수 산출해 가져오기
         if_cnt = if_map_info->count_interface();
 
@@ -538,33 +542,21 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info)
         // 인터페이스 - Port 맵 가져오기
         /*{
             std::unique_lock<std::mutex> lock(mtx);
-            temp_map = if_map_info->get_if_port_map(1);
+            
         }*/
-
+        temp_map = if_map_info->get_if_port_map(1);
         // 트래픽 정보 산출
         // 맵정리
         traffic_info_save->interface_traffic_map.clear();
-        //treaffic 정보 수집 (추후 Thread 분리)
-        //bps_thread = std::thread(&Traffic_Info_Save::get_bps_info, traffic_info_save, if_cnt);
-        //pps_thread = std::thread(&Traffic_Info_Save::get_pps_info, traffic_info_save, if_cnt);
+
+        // bps, pps 정보 수집
         traffic_info_save->get_bps_info(if_cnt);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+
         traffic_info_save->get_pps_info(if_cnt);
-
-        //bps, pps thread 종료 시점까지 대기
-        /*
-        if(bps_thread.joinable())
-        {
-            bps_thread.join();
-        }
-
-        if(pps_thread.joinable())
-        {
-            pps_thread.join();
-        }*/
 
         // bps, pps, 인터페이스를 하나로 합치기
         traffic_info_save->traffic_map_combine();
+
         // join 문제 없으면 산출된 트래픽 정보 DB에 저장
         traffic_info_save->traffic_save_db(temp_map);
 
@@ -579,11 +571,32 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info)
     traffic_info_save = NULL; // 포인터 초기화
 }
 
+// thread 분리 시
+        //treaffic 정보 수집 (추후 Thread 분리)
+        //bps_thread = std::thread(&Traffic_Info_Save::get_bps_info, traffic_info_save, if_cnt);
+        //pps_thread = std::thread(&Traffic_Info_Save::get_pps_info, traffic_info_save, if_cnt)
+        
+        //std::this_thread::sleep_for(std::chrono::seconds(1));
+        
+
+        //bps, pps thread 종료 시점까지 대기
+        /*
+        if(bps_thread.joinable())
+        {
+            bps_thread.join();
+        }
+
+        if(pps_thread.joinable())
+        {
+            pps_thread.join();
+        }
+        */
+
     /*
 
     Traffic 남은 과제 - 90% 완성
     1) 활성화 인터페이스 목록을 활용해보기 위한 방법 생각해 보기
-    2) bps, pps Thread 고민해보기
+    2) thread 분리
 
     */
 

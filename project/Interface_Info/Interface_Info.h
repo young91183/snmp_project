@@ -39,6 +39,8 @@ class Interface_Info_Save
         oid anOID[MAX_OID_LEN]; 
         size_t anOID_len; 
 
+        std::mutex mtx;
+
         // mysql connection 
         const char* mysql_server; 
         const char* user; 
@@ -62,14 +64,13 @@ class Interface_Map_Info
 
         // 활성화 인터페이스 목록
         std::vector<std::string> activate_interface_vec;
-        
+
         // 인터페이스, Port 번호가 매핑되어 있는 변수
         std::map<std::string, std::string>  interface_port_map;
         std::map<std::string, std::string>  port_interface_map;
 
     private : 
-        
-
+    
         // snmp 구조체
         struct snmp_session session, *session_ptr; 
         struct snmp_pdu *pdu_ptr,  *res_pdu_ptr; 

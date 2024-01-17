@@ -54,6 +54,7 @@ Interface_Info_Save::~Interface_Info_Save()
         snmp_free_pdu(res_pdu_ptr);
     }
     snmp_close(session_ptr);
+    //SOCK_CLEANUP;
 
     // mysql 연결 해제
     mysql_close(conn);
@@ -101,7 +102,8 @@ void Interface_Info_Save::ifInfo_save_db(std::map<std::string, std::string> if_p
 
 // 인터페이스 상태 정보 map 변수 갱신
 int Interface_Info_Save::state_map_renew(int if_cnt)
-{
+{   
+    std::unique_lock<std::mutex> lock(mtx);
     int status_int;
     std::string interface_num_str, status_str;
 
@@ -165,7 +167,6 @@ int Interface_Info_Save::state_map_renew(int if_cnt)
 // SNMP 구조체 초기화
 Interface_Map_Info::Interface_Map_Info()
 {
-    std::unique_lock<std::mutex> lock(mtx);
     anOID_len = MAX_OID_LEN;
     snmp_sess_init(&session);
     session.peername = strdup(ROUTER_IP);
@@ -192,7 +193,6 @@ Interface_Map_Info::Interface_Map_Info()
 // 소멸자
 Interface_Map_Info::~Interface_Map_Info()
 {
-    std::unique_lock<std::mutex> lock(mtx);
     // session 정리
     if (res_pdu_ptr) 
     {
@@ -334,7 +334,7 @@ void Interface_Map_Info::aliveIF_vec_renew(std::map<std::string, std::string> m)
 // 인터페이스 개수 반환 (VLAN 포함)
 int Interface_Map_Info::count_interface()
 { 
-    std::unique_lock<std::mutex> lock(mtx);
+    //std::unique_lock<std::mutex> lock(mtx);
     int if_cnt = 0, status_num; 
 
     // PDU 생성 및 OID 추가 
@@ -384,27 +384,27 @@ int Interface_Map_Info::count_interface()
 std::map<std::string, std::string> Interface_Map_Info::get_if_port_map(int req_int)
 {
     std::unique_lock<std::mutex> lock(mtx);
-        if (req_int == 1) // 인터페이스 번호가 키인 맵 반환
-        { 
-            /*for(const auto &pair : interface_port_map) 
-            {
-                std::cout << "Key: " << pair.first << " Value: " << pair.second << "\n";
-            }*/
-            return interface_port_map;
-        }
-        else if(req_int == 2)
-        { // port 번호가 key인 맵 반환
-           /*for(const auto &pair :  port_interface_map) 
-            {
-                std::cout << "Key: " << pair.first << " Value: " << pair.second << "\n";
-            }*/
-            return port_interface_map;
-        } 
-        else 
+    if (req_int == 1) // 인터페이스 번호가 키인 맵 반환
+    { 
+        /*for(const auto &pair : interface_port_map) 
         {
-            std::cout << "잘못된 맵 요청 기본 맵 반환 \n";
-            return interface_port_map;
-        }
+            std::cout << "Key: " << pair.first << " Value: " << pair.second << "\n";
+        }*/
+        return interface_port_map;
+    }
+    else if(req_int == 2)
+    { // port 번호가 key인 맵 반환
+        /*for(const auto &pair :  port_interface_map) 
+        {
+            std::cout << "Key: " << pair.first << " Value: " << pair.second << "\n";
+        }*/
+        return port_interface_map;
+    } 
+    else 
+    {
+        std::cout << "잘못된 맵 요청 기본 맵 반환 \n";
+        return interface_port_map;
+    }
 }
 
 /*------------------------Interface_Map_Info------------------------*/
@@ -425,7 +425,6 @@ std::string getCurrentDateTime()
 // 나중에 Thread 분리 될 모듈 제어를 위한 함수
 void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, Interface_Info_Save* if_info_save)
 {
-
     // 객체 생성
     //Interface_Map_Info* if_map_info = new Interface_Map_Info();
     //Interface_Info_Save* if_info_save = new Interface_Info_Save();
