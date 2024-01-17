@@ -44,9 +44,7 @@ EQPT_Info_Save::EQPT_Info_Save()
 EQPT_Info_Save::~EQPT_Info_Save()
 {
     // session 정리
-    //session_ptr->community = (u_char *)ROUTER_NAME;
-    //session_ptr->community_len = strlen((const char *)session_ptr->community);
-    //snmp_close(session_ptr);
+    snmp_close(session_ptr);
     //SOCK_CLEANUP;
 
     // mysql 연결 해제
@@ -65,7 +63,6 @@ int EQPT_Info_Save::eqpt_save_db(){
 
     for (const auto& [mac, eqpt] : mac_eqpt_map) 
     {
-
         server_ip = ROUTER_IP;
         std::replace(server_ip.begin(), server_ip.end(), '.', '_');
         
@@ -106,8 +103,29 @@ int EQPT_Info_Save::get_vlan_list(int if_cnt)
 
     vlan_list_vec.clear();
 
-    session_ptr->community = (u_char *)ROUTER_NAME;
-    session_ptr->community_len = strlen((const char *)session_ptr->community);
+    snmp_close(session_ptr);
+
+    // SNMP 설정 
+    snmp_sess_init(&session); 
+    session.peername = strdup(ROUTER_IP); 
+
+    // SNMP 버전 설정 (v1, v2c, v3 중 선택) 
+    session.version = SNMP_VERSION_2c; // SNMP v2c 
+
+    // 커뮤니티 문자열 설정 
+    session.community = (u_char *)ROUTER_NAME; // public *
+    session.community_len = strlen((const char *)session.community);
+    session.timeout = 1000000L; // 타임아웃 설정 (1초)
+
+    // 세션 열기
+    //SOCK_STARTUP;
+    session_ptr = snmp_open(&session); 
+    if (!session_ptr) // 오류 발생 시
+    { 
+        snmp_sess_perror("snmp_open", &session); 
+        SOCK_CLEANUP; 
+        exit(1); 
+    }
 
     // PDU 생성 및 OID 추가
     anOID_len = MAX_OID_LEN; // OID 길이 조정
@@ -193,8 +211,30 @@ int EQPT_Info_Save::get_eqpt_info()
     std::string oid_data_str, val_data_str, oid_check_str, ip_str, if_num_str;
     std::string req_oid_str = "1.3.6.1.2.1.4.22.1.2";
 
-    session_ptr->community = (u_char *)ROUTER_NAME;
-    session_ptr->community_len = strlen((const char *)session_ptr->community);
+    /*
+    snmp_close(session_ptr);
+
+    // SNMP 설정 
+    snmp_sess_init(&session); 
+    session.peername = strdup(ROUTER_IP); 
+
+    // SNMP 버전 설정 (v1, v2c, v3 중 선택) 
+    session.version = SNMP_VERSION_2c; // SNMP v2c 
+
+    // 커뮤니티 문자열 설정 
+    session.community = (u_char *)ROUTER_NAME; // public *
+    session.community_len = strlen((const char *)session.community);
+    session.timeout = 1000000L; // 타임아웃 설정 (1초)
+
+    // 세션 열기
+    //SOCK_STARTUP;
+    session_ptr = snmp_open(&session); 
+    if (!session_ptr) // 오류 발생 시
+    { 
+        snmp_sess_perror("snmp_open", &session); 
+        SOCK_CLEANUP; 
+        exit(1); 
+    }*/
 
     // 맵 초기화
     mac_eqpt_map.clear();
@@ -346,9 +386,30 @@ int EQPT_Info_Save::get_vlan_eqpt_port(std::map<std::string, std::string> port_i
 
         router_name = ROUTER_NAME;
         router_name += "@" + vlan_list_vec[vec_cnt];
-        session_ptr->community = (u_char *) router_name.c_str();
-        session_ptr->community_len = strlen((const char *)session_ptr->community);
         //std::cout << "커뮤니티 이름 : " << session_ptr->community  << std::endl;
+
+        // SNMP 설정 
+        snmp_close(session_ptr);
+        snmp_sess_init(&session); 
+        session.peername = strdup(ROUTER_IP); 
+
+        // SNMP 버전 설정 (v1, v2c, v3 중 선택) 
+        session.version = SNMP_VERSION_2c; // SNMP v2c 
+
+        // 커뮤니티 문자열 설정 
+        session.community = (u_char *)router_name.c_str(); // public *
+        session.community_len = strlen((const char *)session.community);
+        session.timeout = 1000000L; // 타임아웃 설정 (1초)
+
+        // 세션 열기
+        //SOCK_STARTUP;
+        session_ptr = snmp_open(&session); 
+        if (!session_ptr) // 오류 발생 시
+        { 
+            snmp_sess_perror("snmp_open", &session); 
+            SOCK_CLEANUP; 
+            exit(1); 
+        }
 
         do {
             // PDU 생성 및 OID 추가

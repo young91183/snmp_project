@@ -7,6 +7,7 @@ int main(void)
 {
     SOCK_STARTUP;
     std::cout << "snmp open\n";
+
     int if_cnt;
     bool isLoop = false, start_sgin = false;
     std::string user_req_str = "";
@@ -15,8 +16,8 @@ int main(void)
 
     Interface_Map_Info* if_map_info = new Interface_Map_Info();
     Interface_Info_Save* if_info_save = new Interface_Info_Save();
-    EQPT_Info_Save* eqpt_info_save = new EQPT_Info_Save();
     Traffic_Info_Save* traffic_info_save = new Traffic_Info_Save();
+    EQPT_Info_Save* eqpt_info_save = new EQPT_Info_Save();
     
     // 초기 인터페이스 맵 작성 (활성화 확인)
     if_cnt = if_map_info->count_interface();
@@ -56,8 +57,6 @@ int main(void)
     // 활동 중인 인터페이스 리스트 추출해 저장
     if_map_info->aliveIF_vec_renew(if_info_save->insterface_state_map);
 
-    
-    
     while(true)
     {   
         // 요청 받기
