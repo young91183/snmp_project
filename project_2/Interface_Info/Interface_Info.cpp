@@ -17,7 +17,7 @@ Interface_Info_Save::Interface_Info_Save()
     // 커뮤니티 문자열 설정 
     session.community = (u_char *)ROUTER_NAME; 
     session.community_len = strlen((const char *)session.community);
-    session.timeout = 1000000L;
+    session.timeout = 100000L;
 
     // 세션 열기
     //SOCK_STARTUP; 
@@ -283,6 +283,7 @@ Interface_Map_Info::Interface_Map_Info()
     // 커뮤니티 문자열 설정
     session.community = (u_char *)ROUTER_NAME;
     session.community_len = strlen((const char *)session.community);
+    session.timeout = 100000L;
 
     // 세션 열기
     //SOCK_STARTUP;
@@ -605,14 +606,15 @@ void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, In
         if (if_cnt == 0) 
         {
             // 오류 처리
-            if_cnt == 50;
-            std::cout << "count error \nRequest : ";
+            //if_cnt == 50;
+            std::cout << "\nRequest : ";
+            continue;
         }
 
         if (if_map_info->interface_map_renew(if_cnt) == -1)
         {
             // 오류 처리
-            std::cout << "interface_map_renew err\nRequest : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
@@ -625,14 +627,14 @@ void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, In
         if (if_info_save->state_map_renew(if_cnt) == -1)
         {
             // 오류 처리
-            std::cout << "state_map_renew err\nRequest : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
         if (if_info_save->if_name_renew(if_cnt) == -1)
         {
             // 오류 처리
-            std::cout << "if_name_renew err\nRequest : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
@@ -643,7 +645,7 @@ void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, In
         if (if_info_save->ifInfo_save_db(temp_map))
         {
             // 오류 처리
-            std::cout << "ifInfo_save_db err\nRequest : ";
+            std::cout << "\nRequest : ";
         }
     }
 }

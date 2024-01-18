@@ -13,7 +13,7 @@ EQPT_Info_Save::EQPT_Info_Save()
     // 커뮤니티 문자열 설정 
     session.community = (u_char *)ROUTER_NAME; // public *
     session.community_len = strlen((const char *)session.community);
-    session.timeout = 1000000L; // 타임아웃 설정 (1초)
+    session.timeout = 100000L; // 타임아웃 설정 (0.1초)
 
     // 세션 열기
     //SOCK_STARTUP;
@@ -84,8 +84,6 @@ int EQPT_Info_Save::eqpt_save_db(){
         // 쿼리문 실행
         if (mysql_query(conn, query.c_str())) 
         {
-            std::cout << query << std::endl << std::endl;
-            std::cerr <<  mysql_error(conn) << std::endl;
             return -1;
         }
     }
@@ -386,12 +384,13 @@ int EQPT_Info_Save::get_vlan_eqpt_port(std::map<std::string, std::string> port_i
 
         router_name = ROUTER_NAME;
         router_name += "@" + vlan_list_vec[vec_cnt];
-        //std::cout << "커뮤니티 이름 : " << session_ptr->community  << std::endl;
+        //std::cout << "vlan_list_vec : " << vlan_list_vec[vec_cnt]  << std::endl;
 
         // SNMP 설정 
         snmp_close(session_ptr);
         snmp_sess_init(&session); 
         session.peername = strdup(ROUTER_IP); 
+        session.timeout = 100000L;
 
         // SNMP 버전 설정 (v1, v2c, v3 중 선택) 
         session.version = SNMP_VERSION_2c; // SNMP v2c 
@@ -410,6 +409,7 @@ int EQPT_Info_Save::get_vlan_eqpt_port(std::map<std::string, std::string> port_i
             SOCK_CLEANUP; 
             exit(1); 
         }
+        //std::cout << "커뮤니티 이름 : " << session_ptr->community << " / "  << router_name << std::endl;
 
         do {
             // PDU 생성 및 OID 추가
@@ -573,28 +573,21 @@ void eqpt_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, EQPT_In
         // 인터페이스 개수 산출 시 오류가 발생한 경우
         if(if_cnt == 0) 
         {
-            // 오류 처리
-            if_cnt =  50;
-            std::cout << "count error \n";
-            std::cout << " Request : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
         // vlan list 추출하기
         if(eqpt_info_save->get_vlan_list(if_cnt) == -1)
         {
-            // 오류 처리
-            std::cout << "get_vlan_list err\n";
-            std::cout << " Request : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
         // 장비 ip, mac, 인터페이스 정보 매핑
         if(eqpt_info_save->get_eqpt_info() == -1)
         {
-            // 오류 처리
-            std::cout << "get_eqpt_info err\n";
-            std::cout << " Request : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
@@ -617,17 +610,15 @@ void eqpt_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, EQPT_In
         // vlan 장비 port 정보 및 인터페이스 정보 매핑
         if(eqpt_info_save->get_vlan_eqpt_port(temp_map) == -1)
         {
-            // 오류 처리
-            std::cout << "get_vlan_eqpt_port err \n";
-            std::cout << " Request : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
         // 산출된 트래픽 정보 DB에 저장
         if(eqpt_info_save->eqpt_save_db() == -1)
         {
-            std::cout << "eqpt_save_db err\n";
-            std::cout << " Request : ";
+            std::cout << "\nRequest : ";
+            continue;
         }
     } // end while 
 }

@@ -13,7 +13,7 @@ Traffic_Info_Save::Traffic_Info_Save()
     // 커뮤니티 문자열 설정 
     session.community = (u_char *)ROUTER_NAME; 
     session.community_len = strlen((const char *)session.community);
-    session.timeout = 1000000L; 
+    session.timeout = 100000L;
 
     // 세션 열기
     //SOCK_STARTUP; 
@@ -256,9 +256,9 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
                 // OID 값 추출
                 snprint_objid(oid_buf, sizeof(oid_buf), vars->name, vars->name_length);
                 interface_num_str = std::string(oid_buf).substr(23); // 인터페이스 정보 추출
-                check_str = std::string(oid_buf).substr(20, 2);
 
-                // MIB 필터
+                // OID 필터
+                check_str = std::string(oid_buf).substr(20, 2);
                 if(check_str != "16") break;
 
                 // value 값 추출
@@ -476,6 +476,7 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
 
 
 // pps 처리
+// 매개변수 (snmp 결과 상태, 반복 번호(총 2회), 패킷 종류, 계산된 SNMP 요청 사이 시간, OID Checker,snmp 결과)
 int Traffic_Info_Save::pps_snmp_operate(int status_num,  int loop_cnt, int index_num,  double runtime, std::string mib_check_str, struct snmp_pdu *res_pdu_ptr)
 {
     double pps_d;
@@ -487,7 +488,7 @@ int Traffic_Info_Save::pps_snmp_operate(int status_num,  int loop_cnt, int index
 
     if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
     {   
-        std::cout << "pps_snmp_operate snmp_synch_response 실패 \n";
+        std::cout << "pps_snmp_operate status_num != STAT_FAIL, res_pdu_ptr == nullptr 실패 \n";
         return -1;
     }
     if(status_num == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR)
@@ -571,7 +572,6 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, Traf
         {
             // 오류 처리
             if_cnt =  50;
-            std::cout << "traffic_save_manger count error \n";
         }
 
         {
@@ -587,15 +587,13 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, Traf
         // bps, pps 정보 수집
         if (traffic_info_save->get_bps_info(if_cnt) == -1)
         {
-            std::cout << "get_bps_info error \n";
-            std::cout << " Request : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
         if (traffic_info_save->get_pps_info(if_cnt) == -1)
         {
-            std::cout << "get_pps_info error \n";
-            std::cout << " Request : ";
+            std::cout << "\nRequest : ";
             continue;
         }
 
@@ -605,7 +603,6 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, Traf
         // join 문제 없으면 산출된 트래픽 정보 DB에 저장
         if (traffic_info_save->traffic_save_db(temp_map) == -1)
         {
-            std::cout << "traffic_save_db error \n";
             std::cout << " Request : ";
         }
     }
