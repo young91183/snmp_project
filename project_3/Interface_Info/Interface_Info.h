@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 #include <map>
 #include <string>
@@ -85,9 +86,7 @@ void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, In
 
 std::string getCurrentDateTime(); // 현재시간 추출 후 Date Time 형식으로 가공해 반환
 
-//int main(void); // 임시 메인 모듈
-
-//void printMap(const std::map<std::string, std::string>& m);
+void add_err_log(std::string tag, std::string detail);
 
 #endif //INTERFACE_INFO_H
 

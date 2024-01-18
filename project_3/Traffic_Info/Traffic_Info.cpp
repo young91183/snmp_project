@@ -164,9 +164,9 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
         }
 
         // 요청결과 확인
-        if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+        if (res_pdu_ptr == nullptr)
         {   
-            std::cout << "get_bps_info snmp_synch_response 실패 \n";
+            add_err_log("Traffic_Info_Save", "get_bps_info : snmp_synch_response err");
             return -1;
         }
         else if (status_num == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR) 
@@ -207,15 +207,15 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
         { // 실패 처리
             if (status_num == STAT_SUCCESS) 
             {
-                std::cerr << "get_bps_info Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+                add_err_log("Traffic_Info_Save", "get_bps_info : get_bps_info Error in packet");
             } 
             else if (status_num == STAT_TIMEOUT) 
             {
-                std::cerr << "get_bps_info Timeout: No res_pdu_ptr from " << session.peername << "\n";
+                add_err_log("Traffic_Info_Save", "get_bps_info : Timeout - No res_pdu_ptr from");
             } 
             else // 알수 없는 오류
             {
-                std::cout << "get_bps_info snmp_synch_response 실패 \n";
+                add_err_log("Traffic_Info_Save", "get_bps_info : snmp_synch_response err");
             }
             return -1;
         }
@@ -247,9 +247,9 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
             status_num = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
         }
         
-        if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+        if (res_pdu_ptr == nullptr)
         {   
-            std::cout << "get_bps_info snmp_synch_response 실패 \n";
+            add_err_log("Traffic_Info_Save", "get_bps_info : snmp_synch_response err");
             return -1;
         }
         else if ( (status_num == STAT_SUCCESS) && (res_pdu_ptr->errstat == SNMP_ERR_NOERROR) ) 
@@ -292,15 +292,15 @@ int Traffic_Info_Save::get_bps_info(int if_cnt)
         { // 실패 처리
             if (status_num == STAT_SUCCESS) 
             {
-                std::cerr << "get_bps_info Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+                add_err_log("Traffic_Info_Save", "get_bps_info : get_bps_info Error in packet");
             } 
             else if (status_num == STAT_TIMEOUT) 
             {
-                std::cerr << "get_bps_info Timeout: No res_pdu_ptr from " << session.peername << "\n";
+                add_err_log("Traffic_Info_Save", "get_bps_info : Timeout - No res_pdu_ptr from");
             } 
             else // 알수 없는 오류
             {
-                std::cout << "get_bps_info snmp_synch_response 실패 \n";
+                add_err_log("Traffic_Info_Save", "get_bps_info : snmp_synch_response err");
             }
             return -1;
         }
@@ -362,7 +362,6 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
         // pps 계산
         if(pps_snmp_operate(status_num, loop_cnt, 0, rTime_d, "11", res_pdu_ptr) == -1)
         {
-            std::cout << "get_pps_info snmp err 0\n";
             return -1;
         }
 
@@ -397,7 +396,6 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
         // ppd 계산
         if(pps_snmp_operate(status_num, loop_cnt, 1, rTime_d, "17", res_pdu_ptr)== -1)
         {
-            std::cout << "get_pps_info snmp err 1\n";
             return -1;
         }
 
@@ -432,7 +430,6 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
         // 인터페이스별 pps 계산
         if(pps_snmp_operate(status_num, loop_cnt, 2, rTime_d, "12", res_pdu_ptr) == -1)
         {
-            std::cout << "get_pps_info snmp err 2\n";
             return -1;
         }
 
@@ -466,7 +463,6 @@ int Traffic_Info_Save::get_pps_info(int if_cnt)
         // 인터페이스 별 pps 계산
         if(pps_snmp_operate(status_num, loop_cnt, 3, rTime_d, "18", res_pdu_ptr) == -1)
         {
-            std::cout << "get_pps_info snmp err 3\n";
             return -1;
         }
 
@@ -492,9 +488,9 @@ int Traffic_Info_Save::pps_snmp_operate(int status_num,  int loop_cnt, int index
     std::string interface_num_str, pps_info_str, check_str;
     netsnmp_variable_list *vars;
 
-    if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+    if (res_pdu_ptr == nullptr)
     {   
-        std::cout << "pps_snmp_operate status_num != STAT_FAIL, res_pdu_ptr == nullptr 실패 \n";
+        add_err_log("Traffic_Info_Save", "pps_snmp_operate : snmp_synch_response err");
         return -1;
     }
     if(status_num == STAT_SUCCESS && res_pdu_ptr->errstat == SNMP_ERR_NOERROR)
@@ -535,16 +531,15 @@ int Traffic_Info_Save::pps_snmp_operate(int status_num,  int loop_cnt, int index
     { // snmp 오류 처리
         if (status_num == STAT_SUCCESS) 
         {
-            std::cout << "pps_snmp_operate Error in packet\nReason: ";
-            std::cerr << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+            add_err_log("Traffic_Info_Save", "pps_snmp_operate : pps_snmp_operate Error in packet");
         } 
         else if (status_num == STAT_TIMEOUT) 
         {
-            std::cerr << "pps_snmp_operate Timeout: No res_pdu_ptr from " << session.peername << "\n";
+            add_err_log("Traffic_Info_Save", "pps_snmp_operate : Timeout - No res_pdu_ptr from ");
         } 
         else 
         {
-            std::cout << "pps_snmp_operate snmp_synch_response 실패 \n";
+            add_err_log("Traffic_Info_Save", "pps_snmp_operate : snmp_synch_response err");
         }
         return -1;
     }
@@ -593,13 +588,11 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, Traf
         // bps, pps 정보 수집
         if (traffic_info_save->get_bps_info(if_cnt) == -1)
         {
-            std::cout << "\nRequest : ";
             continue;
         }
 
         if (traffic_info_save->get_pps_info(if_cnt) == -1)
         {
-            std::cout << "\nRequest : ";
             continue;
         }
 
@@ -609,7 +602,7 @@ void traffic_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, Traf
         // join 문제 없으면 산출된 트래픽 정보 DB에 저장
         if (traffic_info_save->traffic_save_db(temp_map) == -1)
         {
-            std::cout << " Request : ";
+            continue;
         }
     }
 }

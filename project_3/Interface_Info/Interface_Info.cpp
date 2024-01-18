@@ -127,9 +127,9 @@ int Interface_Info_Save::state_map_renew(int if_cnt)
         std::unique_lock<std::mutex> lock(mtx);
         status_num = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
         // 요청결과 확인
-        if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+        if (res_pdu_ptr == nullptr)
         {   
-            std::cout << "snmp_synch_response 실패 \n";
+            add_err_log("Interface_Info_Save", "state_map_renew : Error in packet");
             return -1;
         }
         else if ( (status_num == STAT_SUCCESS) && (res_pdu_ptr->errstat == SNMP_ERR_NOERROR) ) 
@@ -155,15 +155,15 @@ int Interface_Info_Save::state_map_renew(int if_cnt)
         { // 실패 처리
             if (status_num == STAT_SUCCESS) 
             {
-                std::cerr << "Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+                add_err_log("Interface_Info_Save", "state_map_renew : Error in packet");
             } 
             else if (status_num == STAT_TIMEOUT) 
             {
-                std::cerr << "Timeout: No res_pdu_ptr from " << session.peername << "\n";
+                add_err_log("Interface_Info_Save", "state_map_renew : Timeout - No res_pdu_ptr from");
             } 
             else 
             {
-                std::cout << "snmp_synch_response 실패 \n";
+                add_err_log("Interface_Info_Save", "state_map_renew : Error in packet");
             }
 
             if (res_pdu_ptr) 
@@ -209,9 +209,9 @@ int Interface_Info_Save::if_name_renew(int if_cnt)
         status_num = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
 
         // 요청결과 확인
-        if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+        if (res_pdu_ptr == nullptr)
         {   
-            std::cout << "snmp_synch_response 실패 \n";
+            add_err_log("Interface_Info_Save", "Timeout: snmp_synch_response err");
             return -1;
         }
         else if ( (status_num == STAT_SUCCESS) && (res_pdu_ptr->errstat == SNMP_ERR_NOERROR) ) 
@@ -240,15 +240,15 @@ int Interface_Info_Save::if_name_renew(int if_cnt)
         { // 실패 처리
             if (status_num == STAT_SUCCESS) 
             {
-                std::cerr << "Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+                add_err_log("Interface_Info_Save", "if_name_renew : Error in packet");
             } 
             else if (status_num == STAT_TIMEOUT) 
             {
-                std::cerr << "Timeout: No res_pdu_ptr from " << session.peername << "\n";
+                add_err_log("Interface_Info_Save", "if_name_renew : Timeout - No res_pdu_ptr from");
             } 
             else 
             {
-                std::cout << "snmp_synch_response 실패 \n";
+                add_err_log("Interface_Info_Save", "if_name_renew : snmp_synch_response err");
             }
 
             if (res_pdu_ptr) 
@@ -335,9 +335,9 @@ void Interface_Map_Info::map_init()
     }
     
     // 요청결과 확인
-    if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+    if (res_pdu_ptr == nullptr)
     {   
-        std::cout << "snmp_synch_response 실패 \n";
+        add_err_log("Interface_Map_Info", "map_init : Timeout: snmp_synch_response err 실패");
         return;
     }
     else if ( (status_num == STAT_SUCCESS) && (res_pdu_ptr->errstat == SNMP_ERR_NOERROR) ) 
@@ -360,15 +360,15 @@ void Interface_Map_Info::map_init()
     { // 실패 처리
         if (status_num == STAT_SUCCESS) 
         {
-            std::cerr << "Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+            add_err_log("Interface_Map_Info", "map_init : Error in packet");
         } 
         else if (status_num == STAT_TIMEOUT) 
         {
-            std::cerr << "Timeout: No res_pdu_ptr from " << session.peername << "\n";
+            add_err_log("Interface_Map_Info", "map_init : Timeout - No res_pdu_ptr from");
         } 
         else 
         {
-            std::cout << "snmp_synch_response 실패 \n";
+            add_err_log("Interface_Map_Info", "map_init : snmp_synch_response err 실패");
         }
     }
 
@@ -407,9 +407,9 @@ int Interface_Map_Info::interface_map_renew(int if_cnt)
         status_num = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
 
         // 요청결과 확인
-        if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+        if (res_pdu_ptr == nullptr)
         {   
-            std::cout << "snmp_synch_response 실패 \n";
+            add_err_log("Interface_Map_Info", "interface_map_renew : snmp_synch_response err");
             return -1;
         }
         if ( (status_num == STAT_SUCCESS) && (res_pdu_ptr->errstat == SNMP_ERR_NOERROR) ) 
@@ -442,15 +442,15 @@ int Interface_Map_Info::interface_map_renew(int if_cnt)
         { // 실패 처리
             if (status_num == STAT_SUCCESS) 
             {
-                std::cerr << "Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+                add_err_log("Interface_Map_Info", "interface_map_renew : Error in packet");
             } 
             else if (status_num == STAT_TIMEOUT) 
             {
-                std::cerr << "Timeout: No res_pdu_ptr from " << session.peername << "\n";
+                add_err_log("Interface_Map_Info", "interface_map_renew : Timeout - No res_pdu_ptr from");
             } 
             else 
             {
-                std::cout << "snmp_synch_response 실패 \n";
+                add_err_log("Interface_Map_Info", "interface_map_renew : snmp_synch_response err");
             }
 
             if (res_pdu_ptr) 
@@ -505,9 +505,9 @@ int Interface_Map_Info::count_interface()
     }
     
     // 요청결과 확인
-    if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+    if (res_pdu_ptr == nullptr)
     {   
-        std::cout << "snmp_synch_response 실패 \n";
+        add_err_log("Interface_Map_Info", "count_interface : snmp_synch_response err");
         return 0;
     }
     else if ( (status_num == STAT_SUCCESS) && (res_pdu_ptr->errstat == SNMP_ERR_NOERROR) ) 
@@ -534,15 +534,15 @@ int Interface_Map_Info::count_interface()
     { // 실패 처리
         if (status_num == STAT_SUCCESS) 
         {
-            std::cerr << "Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+            add_err_log("Interface_Map_Info", "count_interface : Error in packet");
         } 
         else if (status_num == STAT_TIMEOUT) 
         {
-            std::cerr << "Timeout: No res_pdu_ptr from " << session.peername << "\n";
+            add_err_log("Interface_Map_Info", "count_interface : Timeout - No res_pdu_ptr from");
         } 
         else 
         {
-            std::cout << "snmp_synch_response 실패 \n";
+            add_err_log("Interface_Map_Info", "count_interface : snmp_synch_response err");
         }
     }
 
@@ -578,19 +578,7 @@ std::map<std::string, std::string> Interface_Map_Info::get_if_port_map(int req_i
 
 /*------------------------Interface_Map_Info------------------------*/
 
-// 현재시간 추출 후 Date Time 형식으로 가공해 반환
-std::string getCurrentDateTime() 
-{
-    char buffer[100];
-	auto now = std::chrono::system_clock::now();
-	std::time_t now_t = std::chrono::system_clock::to_time_t(now);
-	std::tm* now_tm = std::localtime(&now_t);
-
-	std::strftime(buffer, 100, "%Y-%m-%d %H:%M:%S", now_tm); // date time 형태로 가공
-
-	return std::string(buffer);
-}
-
+/*------------------------인터페이스 모듈 핸들러------------------------*/
 // 나중에 Thread 분리 될 모듈 제어를 위한 함수
 void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, Interface_Info_Save* if_info_save)
 {
@@ -612,16 +600,11 @@ void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, In
 
         if (if_cnt == 0) 
         {
-            // 오류 처리
-            //if_cnt == 50;
-            std::cout << "\nRequest : ";
             continue;
         }
 
         if (if_map_info->interface_map_renew(if_cnt) == -1)
         {
-            // 오류 처리
-            std::cout << "\nRequest : ";
             continue;
         }
 
@@ -633,15 +616,11 @@ void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, In
 
         if (if_info_save->state_map_renew(if_cnt) == -1)
         {
-            // 오류 처리
-            std::cout << "\nRequest : ";
             continue;
         }
 
         if (if_info_save->if_name_renew(if_cnt) == -1)
         {
-            // 오류 처리
-            std::cout << "\nRequest : ";
             continue;
         }
 
@@ -651,9 +630,43 @@ void interface_save_manger(bool *isLoop_ptr, Interface_Map_Info* if_map_info, In
         // 인터페이스 정보 db에 저장
         if (if_info_save->ifInfo_save_db(temp_map))
         {
-            // 오류 처리
-            std::cout << "\nRequest : ";
+            continue;
         }
     }
 }
+/*------------------------인터페이스 모듈 핸들러------------------------*/
 
+/*------------------------기타 기능 구현------------------------*/
+
+// 현재시간 추출 후 Date Time 형식으로 가공해 반환
+std::string getCurrentDateTime() 
+{
+    char buffer[100];
+	auto now = std::chrono::system_clock::now();
+	std::time_t now_t = std::chrono::system_clock::to_time_t(now);
+	std::tm* now_tm = std::localtime(&now_t);
+
+	std::strftime(buffer, 100, "%Y-%m-%d %H:%M:%S", now_tm); // date time 형태로 가공
+
+	return std::string(buffer);
+}
+
+// 에러 로그 남기는 함수
+void add_err_log(std::string tag, std::string detail) {
+    // 파일을 추가 모드로 연다. (ios::app)
+    std::ofstream file("errlog_.txt", std::ios_base::app);
+    std::string log = "";
+    log += getCurrentDateTime() + " / #" + tag + "  / " + detail + " /\n";
+
+    // 파일이 제대로 열렸는지 확인한다.
+    if (file.is_open()) {
+        // 문자열을 파일에 쓴다.
+        file << log << std::endl;
+
+        // 파일을 닫는다.
+        file.close();
+
+    } else {
+        std::cerr << "파일 열기에 실패했습니다." << std::endl;
+    }
+}

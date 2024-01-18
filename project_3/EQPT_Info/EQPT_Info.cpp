@@ -142,9 +142,9 @@ int EQPT_Info_Save::get_vlan_list(int if_cnt)
         status_num = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
     }
 
-    if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+    if (res_pdu_ptr == nullptr)
     {   
-        std::cout << "get_vlan_list snmp_synch_response 실패 \n";
+        add_err_log("EQPT_Info_Save", "get_vlan_list : snmp_synch_response err");
     }
     else if ( (status_num == STAT_SUCCESS) && (res_pdu_ptr->errstat == SNMP_ERR_NOERROR) ) 
     {  
@@ -183,15 +183,15 @@ int EQPT_Info_Save::get_vlan_list(int if_cnt)
     { // snmp 요청 실패 처리
         if (status_num == STAT_SUCCESS) 
         {
-            std::cerr << "get_vlan_list Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+            add_err_log("EQPT_Info_Save", "get_vlan_list : Error in packet");
         } 
         else if (status_num == STAT_TIMEOUT)
         {
-            std::cerr << "get_vlan_list Timeout: No res_pdu_ptr from " << session.peername << "\n";
+            add_err_log("EQPT_Info_Save", "get_vlan_list : Timeout - No res_pdu_ptr from");
         } 
         else 
         {
-            std::cout << "get_vlan_list snmp_synch_response 실패 \n";
+            add_err_log("EQPT_Info_Save", "get_vlan_list : snmp_synch_response err");
         }
 
         return -1;
@@ -211,31 +211,6 @@ int EQPT_Info_Save::get_eqpt_info()
     bool loop_b = false;
     std::string oid_data_str, val_data_str, oid_check_str, ip_str, if_num_str;
     std::string req_oid_str = "1.3.6.1.2.1.4.22.1.2";
-
-    /*
-    snmp_close(session_ptr);
-
-    // SNMP 설정 
-    snmp_sess_init(&session); 
-    session.peername = strdup(router_ip.c_str()); 
-
-    // SNMP 버전 설정 (v1, v2c, v3 중 선택) 
-    session.version = SNMP_VERSION_2c; // SNMP v2c 
-
-    // 커뮤니티 문자열 설정 
-    session.community = (u_char *)router_name.c_str(); // public *
-    session.community_len = strlen((const char *)session.community);
-    session.timeout = 1000000L; // 타임아웃 설정 (1초)
-
-    // 세션 열기
-    //SOCK_STARTUP;
-    session_ptr = snmp_open(&session); 
-    if (!session_ptr) // 오류 발생 시
-    { 
-        snmp_sess_perror("snmp_open", &session); 
-        SOCK_CLEANUP; 
-        exit(1); 
-    }*/
 
     // 맵 초기화
     mac_eqpt_map.clear();
@@ -258,9 +233,9 @@ int EQPT_Info_Save::get_eqpt_info()
             status_num = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
         }
 
-        if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
-        {   
-            std::cout << "get_eqpt_info snmp_synch_response 실패 \n";
+        if (res_pdu_ptr == nullptr)
+        { 
+            add_err_log("EQPT_Info_Save", "get_eqpt_info : snmp_synch_response err");
             return -1;
         }
         // 응답 처리
@@ -325,17 +300,16 @@ int EQPT_Info_Save::get_eqpt_info()
         { // snmp 응답 실패 처리
             if (status_num == STAT_SUCCESS) 
             {
-                std::cerr << "get_eqpt_info Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+                add_err_log("EQPT_Info_Save", "get_eqpt_info : Error in packet");
             } 
             else if (status_num == STAT_TIMEOUT) 
             {
-                std::cerr << "get_eqpt_info Timeout: No res_pdu_ptr from " << session.peername << "\n";
+                add_err_log("EQPT_Info_Save", "get_eqpt_info : Timeout - No res_pdu_ptr from");
             } 
             else 
             {
-                std::cout << "get_eqpt_info snmp_synch_response 실패 \n";
+                add_err_log("EQPT_Info_Save", "get_eqpt_info : snmp_synch_response err");
             }
-
             return -1;
         }
     } while(!loop_b);
@@ -429,9 +403,9 @@ int EQPT_Info_Save::get_vlan_eqpt_port(std::map<std::string, std::string> port_i
                 status_num = snmp_synch_response(session_ptr, pdu_ptr, &res_pdu_ptr);
             }
 
-            if ( (status_num != STAT_SUCCESS) || (res_pdu_ptr == nullptr) )
+            if (res_pdu_ptr == nullptr)
             {   
-                std::cout << "get_vlan_eqpt_port snmp_synch_response 실패 \n";
+                add_err_log("EQPT_Info_Save", "get_vlan_eqpt_port : snmp_synch_response err");
                 return -1;
                 // 지금은 오류를 리턴해 한턴을 통채로 날리지만 5번 재시도 후에 -1을 리턴하도록 변경
             }
@@ -509,15 +483,15 @@ int EQPT_Info_Save::get_vlan_eqpt_port(std::map<std::string, std::string> port_i
             {
                 if (status_num == STAT_SUCCESS) 
                 {
-                    std::cerr << "get_vlan_eqpt_port Error in packet\nReason: " << snmp_errstring(res_pdu_ptr->errstat) << "\n";
+                    add_err_log("EQPT_Info_Save", "get_vlan_eqpt_port : Error in packet");
                 } 
                 else if (status_num == STAT_TIMEOUT) 
                 {
-                    std::cerr << "get_vlan_eqpt_port Timeout: No res_pdu_ptr from " << session.peername << "\n";
+                    add_err_log("EQPT_Info_Save", "get_vlan_eqpt_port : Timeout - No res_pdu_ptr from ");
                 } 
                 else 
                 {
-                    snmp_sess_perror("get_vlan_eqpt_port snmp_synch_res", session_ptr);
+                    add_err_log("EQPT_Info_Save", "get_vlan_eqpt_port : snmp_synch_response err");
                 }
                 return -1;
             }

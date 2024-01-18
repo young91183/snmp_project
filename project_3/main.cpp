@@ -68,7 +68,7 @@ void net_info_save(std::string ip, std::string community, bool * isLoop_ptr)
     // 인터페이스 정보 수집 Thread 종료 대기
     if(interface_thread.joinable())
     {
-        interface_thread.join();         
+        interface_thread.join();
     }
 
     // 장비정보 수집 객체 종료 대기
@@ -102,7 +102,8 @@ void net_info_save(std::string ip, std::string community, bool * isLoop_ptr)
 }
 
 
-bool isSnmpValid(const char* ip, const char* community) {
+bool isSnmpValid(const char* ip, const char* community) 
+{
     bool isValid;
     struct snmp_session session, *session_ptr;
     struct snmp_pdu *pdu, *response;
@@ -119,7 +120,8 @@ bool isSnmpValid(const char* ip, const char* community) {
     //session.timeout = 1000000L; // 타임아웃 설정 (1초)
 
     session_ptr = snmp_open(&session);
-    if (!session_ptr) {
+    if (!session_ptr) 
+    {
         return false;
     }
 
@@ -131,16 +133,17 @@ bool isSnmpValid(const char* ip, const char* community) {
 
     status = snmp_synch_response(session_ptr, pdu, &response);
 
-    if( !((status != STAT_SUCCESS) || (response == nullptr)) )
+    if(response != nullptr)
     {
-    isValid = (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR);
+        isValid = (status == STAT_SUCCESS && response->errstat == SNMP_ERR_NOERROR);
     }
     else 
     {
         isValid = false;
     }
 
-    if (response) {
+    if (response) 
+    {
         snmp_free_pdu(response);
     }
     snmp_close(session_ptr);
@@ -213,18 +216,15 @@ int main(void)
         // 종료 요청을 한 경우
         else if(user_req_oper_str == "quit")
         {
-            if(start_sgin == true)
-            {
-                start_sgin = false;
-            }
-
             // thread 종료 신호 
             isLoop = false;
+
+            // thread 종료 대기
             for(auto & net_thread : thread_vec)
             {
                 if(net_thread.joinable())
                 {
-                net_thread .join();
+                    net_thread .join();
                 }
             }
             std::cout << "수집 동작 중단 완료\n";
@@ -234,9 +234,7 @@ int main(void)
         {
             std::cout << "잘못된 요청입니다\n";
         }
-
     }
-    
 
     SOCK_CLEANUP;
     std::cout << "snmp 종료\n";
