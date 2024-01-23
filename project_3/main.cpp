@@ -117,7 +117,7 @@ bool isSnmpValid(const char* ip, const char* community)
     session.version = SNMP_VERSION_2c;
     session.community = (u_char*)community;
     session.community_len = strlen(community);
-    //session.timeout = 1000000L; // 타임아웃 설정 (1초)
+    session.timeout = 1000000L; // 타임아웃 설정 (1초)
 
     session_ptr = snmp_open(&session);
     if (!session_ptr) 
@@ -142,7 +142,7 @@ bool isSnmpValid(const char* ip, const char* community)
         isValid = false;
     }
 
-    if (response) 
+    if (response)
     {
         snmp_free_pdu(response);
     }
@@ -176,6 +176,7 @@ int main(void)
             std::cin >> user_req_ip_str;
             std::cout << "Community_Name : ";
             std::cin >> user_req_name;
+
             // ip, 커뮤니티 이름 확인
             ip_comm_check = isSnmpValid(user_req_ip_str.c_str(), user_req_name.c_str());
             if(!ip_comm_check) 
@@ -183,7 +184,8 @@ int main(void)
                 std::cout << "잘못된 IP와 이름입니다. 다시 입력해 주세요\n";
                 continue;
             }
-            std::cout << user_req_ip_str + "IP, 이름 정상 \n";
+            std::cout << user_req_ip_str + " : 정상 IP \n";
+
             // 반복문 활성화
             isLoop = true;
             thread_vec.push_back(std::thread(net_info_save, user_req_ip_str.c_str(), user_req_name.c_str(), &isLoop));

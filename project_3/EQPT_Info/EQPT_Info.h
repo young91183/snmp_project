@@ -6,7 +6,6 @@
 class EQPT_Info_Save 
 { 
     public: 
-
         explicit EQPT_Info_Save(const char* ip, const char* community); // 생성자 snmp pdu, session 초기화
         ~EQPT_Info_Save(); 
 

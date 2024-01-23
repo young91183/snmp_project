@@ -1,8 +1,103 @@
-2024-01-18 15:28:10 / #Traffic_Info_Save  / get_bps_info : snmp_synch_response err /
 
-2024-01-18 15:28:15 / #Traffic_Info_Save  / get_bps_info : snmp_synch_response err /
+2024-01-18 16:32:26 / #Interface_Map_Info  / count_interface : snmp_synch_response err /
 
-2024-01-18 15:39:26 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+2024-01-18 16:33:33 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
 
-2024-01-18 15:39:28 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+2024-01-18 16:40:57 / #EQPT_Info_Save  / get_vlan_list : snmp_synch_response err /
+
+2024-01-18 16:42:09 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-19 13:03:19 / #Interface_Map_Info  / map_init : Timeout: snmp_synch_response err 실패 /
+
+2024-01-19 13:03:50 / #EQPT_Info_Save  / get_eqpt_info : snmp_synch_response err /
+
+2024-01-19 13:04:33 / #EQPT_Info_Save  / get_vlan_list : snmp_synch_response err /
+
+2024-01-19 13:04:50 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-19 13:04:52 / #Interface_Info_Save  / state_map_renew : Error in packet /
+
+2024-01-19 13:05:06 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-19 13:05:22 / #Interface_Map_Info  / count_interface : snmp_synch_response err /
+
+2024-01-19 13:05:38 / #Interface_Info_Save  / state_map_renew : Error in packet /
+
+2024-01-19 13:05:59 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-19 13:06:10 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-19 13:06:10 / #Interface_Map_Info  / map_init : Timeout: snmp_synch_response err 실패 /
+
+2024-01-22 11:25:10 / #Traffic_Info_Save  / get_bps_info : snmp_synch_response err /
+
+2024-01-22 11:26:30 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-22 11:26:31 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-22 11:26:35 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-22 11:26:45 / #Interface_Info_Save  / state_map_renew : Error in packet /
+
+2024-01-22 11:26:52 / #EQPT_Info_Save  / get_vlan_list : snmp_synch_response err /
+
+2024-01-22 11:28:13 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-22 13:40:47 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-22 13:51:38 / #Interface_Map_Info  / interface_map_renew : snmp_synch_response err /
+
+2024-01-22 13:52:20 / #EQPT_Info_Save  / get_vlan_list : snmp_synch_response err /
+
+2024-01-22 13:52:20 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-22 13:52:33 / #Interface_Map_Info  / count_interface : snmp_synch_response err /
+
+2024-01-22 13:52:42 / #Interface_Info_Save  / Timeout: snmp_synch_response err /
+
+2024-01-22 13:53:30 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-23 10:43:12 / #EQPT_Info_Save  / get_eqpt_info : snmp_synch_response err /
+
+2024-01-23 10:43:14 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-23 10:43:20 / #Traffic_Info_Save  / get_bps_info : snmp_synch_response err /
+
+2024-01-23 10:43:43 / #Traffic_Info_Save  / get_bps_info : snmp_synch_response err /
+
+2024-01-23 10:43:43 / #Traffic_Info_Save  / get_bps_info : snmp_synch_response err /
+
+2024-01-23 10:43:44 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-23 10:43:46 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-23 10:43:47 / #Interface_Map_Info  / count_interface : snmp_synch_response err /
+
+2024-01-23 10:43:56 / #EQPT_Info_Save  / get_vlan_list : snmp_synch_response err /
+
+2024-01-23 10:43:58 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-23 10:44:01 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-23 10:44:06 / #Interface_Map_Info  / count_interface : snmp_synch_response err /
+
+2024-01-23 10:44:11 / #EQPT_Info_Save  / get_vlan_list : snmp_synch_response err /
+
+2024-01-23 10:44:11 / #Interface_Info_Save  / state_map_renew : Error in packet /
+
+2024-01-23 10:44:12 / #EQPT_Info_Save  / get_eqpt_info : snmp_synch_response err /
+
+2024-01-23 10:44:18 / #Traffic_Info_Save  / get_bps_info : snmp_synch_response err /
+
+2024-01-23 10:44:20 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-23 10:44:20 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-23 10:44:22 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-23 10:44:26 / #EQPT_Info_Save  / get_vlan_eqpt_port : snmp_synch_response err /
+
+2024-01-23 10:44:34 / #Traffic_Info_Save  / pps_snmp_operate : snmp_synch_response err /
+
+2024-01-23 10:44:34 / #Interface_Map_Info  / map_init : Timeout: snmp_synch_response err 실패 /
 
